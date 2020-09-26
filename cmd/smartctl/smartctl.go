@@ -17,6 +17,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"os"
@@ -27,6 +28,7 @@ import (
 	"golang.org/x/sys/unix"
 
 	"github.com/dswarbrick/smart"
+	"github.com/dswarbrick/smart/cmd/smartctl/smartdb"
 	"github.com/dswarbrick/smart/drivedb"
 	"github.com/dswarbrick/smart/megaraid"
 	"github.com/dswarbrick/smart/nvme"
@@ -122,7 +124,7 @@ func main() {
 
 		defer d.Close()
 
-		db, err := drivedb.OpenDriveDb("drivedb.yaml")
+		db, err := drivedb.OpenDriveDbFromReader(bytes.NewBuffer(smartdb.MustAsset("drivedb.yaml")))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

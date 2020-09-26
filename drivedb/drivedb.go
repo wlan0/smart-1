@@ -15,6 +15,7 @@
 package drivedb
 
 import (
+	"io"
 	"os"
 	"regexp"
 	"strings"
@@ -82,15 +83,21 @@ func (db *DriveDb) LookupDrive(ident []byte) DriveModel {
 
 // OpenDriveDb opens a YAML-formatted drive database, unmarshalls it, and returns a DriveDb.
 func OpenDriveDb(dbfile string) (DriveDb, error) {
-	var db DriveDb
-
 	f, err := os.Open(dbfile)
 	if err != nil {
-		return db, nil
+		return DriveDb{}, nil
 	}
-
 	defer f.Close()
-	dec := yaml.NewDecoder(f)
+	
+	return OpenDriveDbFromReader(f)
+}
+
+
+// OpenDriveDbFromReader reads a YAML formatted drive database, unmarshalls it, and returns a DriveDB
+func OpenDriveDbFromReader(reader io.Reader) (DriveDb, error) {
+	var db DriveDb
+
+	dec := yaml.NewDecoder(reader)
 
 	if err := dec.Decode(&db); err != nil {
 		return db, err
@@ -100,5 +107,5 @@ func OpenDriveDb(dbfile string) (DriveDb, error) {
 		db.Drives[i].CompiledRegexp, _ = regexp.Compile(d.ModelRegex)
 	}
 
-	return db, nil
+	return db, nil	
 }
